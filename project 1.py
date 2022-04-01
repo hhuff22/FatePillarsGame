@@ -129,8 +129,8 @@ def loadScreen():
     print("")
     print("Welcome to Pillars of Fate~")
     print("")
-    print("1 - New Game")
-    print("2 - Load Game")
+    print("[1] - New Game")
+    print("[2] - Load Game")
 
     gameChoice = input()
     global currentPlayer
@@ -138,19 +138,26 @@ def loadScreen():
         intro()
     elif int(gameChoice) == 2:
         print("")
+        print("Saved Characters:")
         for doc in charDataColl.find({}):
             print(doc["name"])
+        print("")
         print("Select a character")
         selectedChar = input()
         for doc in charDataColl.find({}):
             if doc["name"] == selectedChar:
                 if doc["class"] == 'FireMage':
                     currentPlayer = FireMage(doc["name"], doc["level"])
+                    campaignStart()
                 elif doc["class"] == 'IceMage':
                     currentPlayer = IceMage(doc["name"], doc["level"])
+                    campaignStart()
                 elif doc["class"] == 'LightningMage':
                     currentPlayer = LightningMage(doc["name"], doc["level"])
-        campaignStart()
+                    campaignStart()
+
+        print("Character not found!")
+        quit()
     else:
         print("Enter either 1 or 2")
 
@@ -164,8 +171,8 @@ def intro():
     print("The walls are lined with bookshelves, each filled to the ceiling with books -- the library is a grand wonder to behold.")
     print("Two distinctly decorated ornate books stand out among the rest, an orange book and a green one.")
     print("")
-    print("1 - Open the orange book.")
-    print("2 - Open the green book.")
+    print("[1] - Open the orange book.")
+    print("[2] - Open the green book.")
 
     while True:
         orangeOrGreen = input()
@@ -218,9 +225,9 @@ def intro():
         print("")
         print("Choose a class:")
         print("")
-        print("1 - Fire Mage")
-        print("2 - Ice Mage")
-        print("3 - Lightning Mage")
+        print("[1] - Fire Mage")
+        print("[2] - Ice Mage")
+        print("[3] - Lightning Mage")
         chosenClass = input()
 
         if int(chosenClass) == 1:
@@ -229,8 +236,8 @@ def intro():
             print("")
             print("Will you choose this class?")
             print("")
-            print("1 - Yes")
-            print("2 - No")
+            print("[1] - Yes")
+            print("[2] - No")
             confirmClass = input()
             if int(confirmClass) == 1:
                 playerClass = "Fire Mage"
@@ -246,8 +253,8 @@ def intro():
             print("")
             print("Will you choose this class?")
             print("")
-            print("1 - Yes")
-            print("2 - No")
+            print("[1] - Yes")
+            print("[2] - No")
             confirmClass = input()
             if int(confirmClass) == 1:
                 playerClass = "Ice Mage"
@@ -263,8 +270,8 @@ def intro():
             print("")
             print("Will you choose this class?")
             print("")
-            print("1 - Yes")
-            print("2 - No")
+            print("[1] - Yes")
+            print("[2] - No")
             confirmClass = input()
             if int(confirmClass) == 1:
                 playerClass = "Lightning Mage"
@@ -281,9 +288,9 @@ def intro():
 
 def nextAction():
     print("")
-    print("1 - Check status")
-    print("2 - Go forth")
-    print("3 - Save & Quit")
+    print("[1] - Check status")
+    print("[2] - Go forth")
+    print("[3] - Save & Quit")
     nextChoice = input()
 
     if int(nextChoice) == 1:
@@ -310,9 +317,11 @@ def nextAction():
                 print("?")
     elif int(nextChoice) == 3:
         print("")
+        previousCharData= { "name": currentPlayer.name }
+        charDataColl.delete_one(previousCharData)
         currentCharData = {"class": type(currentPlayer).__name__, "name": currentPlayer.name, "level": currentPlayer.level}
-        doc_id = charDataColl.insert_one(currentCharData).inserted_id
-        print(doc_id)
+        charDataColl.insert_one(currentCharData)
+        quit()
     else:
         print("Enter either 1, 2 or 3")
 
@@ -364,7 +373,13 @@ def Part1():
 
         if currentPlayer.health <= 0:
             print("You died...")
-            quit()
+            print("")
+            print("Game Saved.")
+            previousCharData= { "name": currentPlayer.name }
+            charDataColl.delete_one(previousCharData)
+            currentCharData = {"class": type(currentPlayer).__name__, "name": currentPlayer.name, "level": currentPlayer.level}
+            charDataColl.insert_one(currentCharData)
+            loadScreen()
 
     print("You've killed the Sullen Woman...")
 
